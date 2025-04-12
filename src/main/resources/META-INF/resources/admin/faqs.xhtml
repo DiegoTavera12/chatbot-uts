@@ -1,0 +1,258 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/templates/template.xhtml">
+
+    <ui:define name="titulo">
+        Administración FAQs
+    </ui:define>
+    <ui:define name="nombreUsuario">
+        #{loginMB.userName}
+    </ui:define>
+
+    <ui:define name="nombrePagina">
+        Chat
+    </ui:define>
+
+    <ui:define name="contenido">
+        <!-- Formulario principal para el contenido -->
+        <h:form id="formFaq">
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="Nueva FAQ" icon="pi pi-plus"
+                                     actionListener="#{faqMB.crearFaq}"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-faq-content"
+                                     oncomplete="PF('manageFaqDialog').show()"
+                                     styleClass="ui-button-success boton-espaciado">
+                        <p:resetInput target=":dialogs:manage-faq-content"/>
+                    </p:commandButton>
+                    <p:commandButton id="btnEliminar" value="Eliminar Selección"
+                                     styleClass="ui-button-danger boton-espaciado"
+                                     icon="pi pi-trash"
+                                     actionListener="#{faqMB.eliminarSeleccion}"
+                                     update="@form"
+                                     disabled="#{empty faqMB.selectedFaqs}">
+                        <p:confirm header="Confirmación"
+                                   message="¿Eliminar las FAQs seleccionadas?"
+                                   icon="pi pi-exclamation-triangle"/>
+                        <p:resetInput target=":dialogs:manage-faq-content"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <!-- DataTable con paginación, filtros y selección -->
+            <p:dataTable id="dtFaqs" var="faq" widgetVar="dtFaqs"
+                         value="#{faqMB.lazyFaqs}" lazy="true"
+                         paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                         rowsPerPageTemplate="5,10,15,20,50,100"
+                         paginator="true" rows="10" emptyMessage="No se encontraron registros"
+                         sortMode="single" selection="#{faqMB.selectedFaqs}"
+                         selectionPageOnly="false" selectionRowMode="multiple"
+                         scrollable="true" scrollWidth="100%">
+
+                <f:facet name="header">
+                    <div class="faqs-table-header">
+                        <span style="font-weight: bold">FAQs</span>
+                        <span class="filter-container ui-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <p:inputText id="globalFilter" onkeyup="PF('dtFaqs').filter()" placeholder="Buscar..."/>
+                        </span>
+                    </div>
+                </f:facet>
+
+                <!-- Ajax para actualizar botón de eliminación según la selección -->
+                <p:ajax event="rowSelect" update=":formFaq:btnEliminar"/>
+                <p:ajax event="rowUnselect" update=":formFaq:btnEliminar"/>
+                <p:ajax event="rowSelectCheckbox" update=":formFaq:btnEliminar"/>
+                <p:ajax event="rowUnselectCheckbox" update=":formFaq:btnEliminar"/>
+                <p:ajax event="toggleSelect" process="@this" update=":formFaq:btnEliminar"/>
+
+
+                <!-- Columna de selección -->
+                <p:column selectionBox="true" style="text-align:center" width="50"/>
+
+                <!-- Columnas con filtros y ordenamiento -->
+                <p:column headerText="ID" filterBy="#{faq.id}" sortBy="#{faq.id}" filterMatchMode="contains" width="50"
+                          footerText="ID">
+                    <h:outputText value="#{faq.id}"/>
+                </p:column>
+
+                <p:column headerText="Pregunta" filterBy="#{faq.pregunta}" sortBy="#{faq.pregunta}"
+                          filterMatchMode="contains" width="300" footerText="Pregunta">
+                    <h:outputText value="#{faq.pregunta}"/>
+                </p:column>
+
+                <p:column headerText="Respuesta" filterBy="#{faq.respuesta}" sortBy="#{faq.respuesta}"
+                          filterMatchMode="contains" width="300" footerText="Respuesta">
+                    <h:outputText value="#{faq.respuesta}"/>
+                </p:column>
+
+                <p:column headerText="Palabras clave" filterBy="#{faq.palabrasClaveString}"
+                          sortBy="#{faq.palabrasClaveString}" filterMatchMode="contains" width="300"
+                          footerText="Palabras clave">
+                    <h:outputText value="#{faq.palabrasClaveString}"/>
+                </p:column>
+
+                <p:column headerText="Veces Usada" filterBy="#{faq.vecesUsada}" sortBy="#{faq.vecesUsada}" width="150"
+                          footerText="Veces Usada">
+                    <h:outputText value="#{faq.vecesUsada}"/>
+                </p:column>
+
+                <p:column headerText="Estado" filterBy="#{faq.estado}" sortBy="#{faq.estado}" width="100"
+                          footerText="Estado">
+                    <f:facet name="filter">
+                        <p:selectOneMenu onchange="PF('dtFaqs').filter()">
+                            <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItem itemLabel="Activo" itemValue="#{true}"/>
+                            <f:selectItem itemLabel="Inactivo" itemValue="#{false}"/>
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{faq.estado ? 'Activo' : 'Inactivo'}"/>
+                </p:column>
+
+                <p:column headerText="Creado" filterBy="#{faq.createdAt}" sortBy="#{faq.createdAt}" width="300"
+                          footerText="Creado">
+                    <f:facet name="filter">
+                        <p:datePicker selectionMode="range" showTime="true" timeOnly="false"
+                                      pattern="dd/MM/yyyy HH:mm:ss"
+                                      onchange="PF('dtFaqs').filter()"
+                                      converter="instantConverter"/>
+                    </f:facet>
+                    <h:outputText value="#{faq.createdAt}">
+                        <f:converter converterId="instantConverter"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Actualizado" filterBy="#{faq.updatedAt}" sortBy="#{faq.updatedAt}" width="300"
+                          footerText="Actualizado">
+                    <f:facet name="filter">
+                        <p:datePicker selectionMode="range" showTime="true" timeOnly="false"
+                                      pattern="dd/MM/yyyy HH:mm:ss"
+                                      onchange="PF('dtFaqs').filter()"
+                                      converter="instantConverter"/>
+                    </f:facet>
+                    <h:outputText value="#{faq.updatedAt}">
+                        <f:converter converterId="instantConverter"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Acciones" style="text-align:center" width="100">
+                    <p:commandButton icon="pi pi-pencil" title="Editar"
+                                     actionListener="#{faqMB.editarFaq(faq)}"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-faq-content, :formFaq:dtFaqs"
+                                     oncomplete="PF('manageFaqDialog').show()"
+                                     styleClass="edit-button rounded-button ui-button-success boton-espaciado">
+                        <f:setPropertyActionListener target="#{faqMB.selectedFaq}" value="#{faq}"/>
+                        <p:resetInput target=":dialogs:manage-faq-content"/>
+                    </p:commandButton>
+                    <p:commandButton icon="pi pi-trash" title="Eliminar"
+                                     actionListener="#{faqMB.eliminarFaq}"
+                                     process="@this"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-faq-content, :formFaq:dtFaqs"
+                                     oncomplete="PF('deleteFaqDialog').show()"
+                                     styleClass="ui-button-warning rounded-button boton-espaciado">
+                        <f:setPropertyActionListener target="#{faqMB.selectedFaq}" value="#{faq}"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+
+    <ui:define name="dialogs">
+        <!-- Diálogos para mantener los inputs fuera del efecto fade -->
+        <h:form id="dialogs" enctype="multipart/form-data">
+            <!-- Diálogo para crear/editar FAQ -->
+            <p:dialog widgetVar="manageFaqDialog"
+                      header="Detalles de FAQ"
+                      modal="true"
+                      responsive="true"
+                      width="600"
+                      showEffect="fade">
+                <p:outputPanel id="manage-faq-content" class="ui-fluid">
+                    <p:panelGrid columns="2" columnClasses="label,value" style="margin-bottom:10px">
+                        <p:outputLabel for="pregunta" value="Pregunta:"/>
+                        <p:inputTextarea id="pregunta" value="#{faqMB.pregunta}" required="true" autoResize="false"/>
+
+                        <p:outputLabel for="respuesta" value="Respuesta:"/>
+                        <p:inputTextarea id="respuesta" value="#{faqMB.respuesta}" required="true" autoResize="false"/>
+
+                        <p:outputLabel for="palabrasClave" value="Palabras Clave:"/>
+                        <p:inputTextarea id="palabrasClave" value="#{faqMB.palabrasClaveText}"
+                                         autoResize="false" placeholder="Separadas por comas"/>
+
+                        <p:outputLabel for="switchConsultar" value="Generar automaticamente:"/>
+                        <p:inputSwitch id="switchConsultar" value="#{faqMB.esConsultarPalabrasClave}"
+                                       style="margin-top:5px" styleClass="custom-switch"/>
+
+                        <p:outputLabel for="estado" value="Estado:"/>
+                        <h:selectBooleanCheckbox id="estado" value="#{faqMB.estado}"/>
+
+                        <!-- Otros campos de la FAQ -->
+                        <p:outputLabel for="fileUpload" value="Adjuntar Archivos:"/>
+                        <p:fileUpload id="fileUpload" value="#{faqMB.files}" mode="simple"
+                                      skinSimple="true" multiple="true"/>
+
+                        <p:panel header="Archivos Adjuntos">
+                            <p:dataTable value="#{faqMB.fileList}" var="file" emptyMessage="No hay archivos adjuntos">
+                                <p:column headerText="Archivo">
+                                    <h:outputText value="#{file}"/>
+                                </p:column>
+                                <p:column headerText="Acciones">
+                                    <p:commandButton value="Descargar" ajax="false">
+                                        <p:fileDownload value="#{faqMB.downloadFile(file)}"/>
+                                    </p:commandButton>
+                                    <p:commandButton value="Eliminar" action="#{faqMB.marcarEliminarArchivo(file)}"
+                                                     update=":dialogs:manage-faq-content"
+                                                     styleClass="ui-button-danger"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:panel>
+
+                    </p:panelGrid>
+
+
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Guardar" icon="pi pi-check"
+                                     actionListener="#{faqMB.registrar}"
+                                     update="globalMessages:globalGrowl, manage-faq-content, :formFaq:dtFaqs"
+                                     process="manage-faq-content @this"
+                                     ajax="false"
+                                     oncomplete="if (!args.validationFailed) { PF('manageFaqDialog').hide(); }"/>
+                    <p:commandButton value="Cancelar" icon="pi pi-times"
+                                     onclick="PF('manageFaqDialog').hide()"
+                                     type="button"
+                                     styleClass="ui-button-secondary"/>
+                </f:facet>
+            </p:dialog>
+
+            <!-- Diálogo de confirmación para eliminación individual -->
+            <p:confirmDialog widgetVar="deleteFaqDialog"
+                             header="Confirmación"
+                             message="¿Está seguro de eliminar esta FAQ?"
+                             modal="true"
+                             showEffect="fade"
+                             width="300">
+                <p:commandButton value="Sí" icon="pi pi-check"
+                                 actionListener="#{faqMB.eliminarFaq}"
+                                 process="@this"
+                                 update="globalMessages:globalGrowl, :formFaq:btnEliminar, manage-faq-content, :formFaq:dtFaqs"
+                                 oncomplete="PF('deleteFaqDialog').hide()"/>
+                <p:commandButton value="No" icon="pi pi-times"
+                                 onclick="PF('deleteFaqDialog').hide()"
+                                 type="button" styleClass="ui-button-secondary"/>
+            </p:confirmDialog>
+
+            <!-- Confirm Dialog global (opcional para múltiples eliminaciones) -->
+            <p:confirmDialog global="true" showEffect="fade" width="300">
+                <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                                 icon="pi pi-times"/>
+            </p:confirmDialog>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

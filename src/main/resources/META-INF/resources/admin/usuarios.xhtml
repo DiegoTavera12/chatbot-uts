@@ -1,0 +1,266 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/templates/template.xhtml">
+
+    <ui:define name="titulo">
+        Administración Usuarios
+    </ui:define>
+    <ui:define name="nombreUsuario">
+        #{loginMB.userName}
+    </ui:define>
+
+    <ui:define name="nombrePagina">
+        Módulo Configuración Usuarios
+    </ui:define>
+
+    <ui:define name="contenido">
+        <!-- Formulario principal para el contenido -->
+        <h:form id="formCrud">
+
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo Usuario" icon="pi pi-plus"
+                                     actionListener="#{usuarioMB.crearUsuario}"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-usuario-content"
+                                     oncomplete="PF('manageUsuarioDialog').show()"
+                                     styleClass="ui-button-success boton-espaciado">
+                        <p:resetInput target=":dialogs:manage-usuario-content"/>
+                    </p:commandButton>
+                    <!-- Botón Eliminar Selección: con confirmación -->
+                    <p:commandButton id="btnEliminar" value="Eliminar Selección"
+                                     styleClass="ui-button-danger boton-espaciado"
+                                     icon="pi pi-trash"
+                                     actionListener="#{usuarioMB.eliminarSeleccion}"
+                                     update="@form"
+                                     disabled="#{empty usuarioMB.selectedUsuarios}">
+                        <p:confirm header="Confirmación"
+                                   message="¿Eliminar los usuarios seleccionados?"
+                                   icon="pi pi-exclamation-triangle"/>
+                        <p:resetInput target=":dialogs:manage-usuario-content"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <!-- DataTable con paginación, filtros y selección -->
+            <p:dataTable id="dtUsuarios" var="usuario" widgetVar="dtUsuarios"
+                         value="#{usuarioMB.lazyUsuarios}" lazy="true"
+                         paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                         rowsPerPageTemplate="5,10,15,20,50,100"
+                         paginator="true" rows="10" emptyMessage="No se encontraron registros"
+                         sortMode="single" selection="#{usuarioMB.selectedUsuarios}"
+                         selectionPageOnly="false" selectionRowMode="multiple"
+                         scrollable="true" scrollWidth="100%" >
+
+                <f:facet name="header">
+                    <div class="usuarios-table-header">
+                        <span style="font-weight: bold">Usuarios</span>
+                        <span class="filter-container ui-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <p:inputText id="globalFilter" onkeyup="PF('dtUsuarios').filter()" placeholder="Buscar..."/>
+                        </span>
+                    </div>
+                </f:facet>
+
+                <!-- Ajax para actualizar botón de eliminación según la selección -->
+                <p:ajax event="rowSelect" update=":formCrud:btnEliminar"/>
+                <p:ajax event="rowUnselect" update=":formCrud:btnEliminar"/>
+                <p:ajax event="rowSelectCheckbox" update=":formCrud:btnEliminar"/>
+                <p:ajax event="rowUnselectCheckbox" update=":formCrud:btnEliminar"/>
+                <p:ajax event="toggleSelect" update=":formCrud:btnEliminar"/>
+
+                <!-- Columna de selección -->
+                <p:column selectionBox="true" style="text-align:center" width="50"/>
+
+                <!-- Columnas con filtros y ordenamiento -->
+                <p:column headerText="ID" filterBy="#{usuario.id}" sortBy="#{usuario.id}" filterMatchMode="contains" width="50" footerText="ID">
+                    <h:outputText value="#{usuario.id}"/>
+                </p:column>
+
+                <p:column headerText="Nombre" filterBy="#{usuario.nombre}" sortBy="#{usuario.nombre}" footerText="Nombre"
+                          filterMatchMode="contains" width="300">
+                    <h:outputText value="#{usuario.nombre}"/>
+                </p:column>
+
+                <p:column headerText="Apellido" filterBy="#{usuario.apellido}" sortBy="#{usuario.apellido}" footerText="Apellido"
+                          filterMatchMode="contains" width="300">
+                    <h:outputText value="#{usuario.apellido}"/>
+                </p:column>
+
+                <p:column headerText="Doc Identificación" filterBy="#{usuario.documentoIdentificacion}" footerText="Doc Identificación"
+                          sortBy="#{usuario.documentoIdentificacion}" filterMatchMode="contains" width="200">
+                    <h:outputText value="#{usuario.documentoIdentificacion}"/>
+                </p:column>
+
+                <p:column headerText="Num Estudiante" footerText="Num Estudiante" filterBy="#{usuario.documentoEstudiante}"
+                          sortBy="#{usuario.documentoEstudiante}" filterMatchMode="contains" width="200">
+                    <h:outputText value="#{usuario.documentoEstudiante}"/>
+                </p:column>
+
+                <p:column headerText="Correo" footerText="Correo" filterBy="#{usuario.correoElectronico}"
+                          sortBy="#{usuario.correoElectronico}" filterMatchMode="contains" width="300">
+                    <h:outputText value="#{usuario.correoElectronico}"/>
+                </p:column>
+
+                <p:column headerText="Rol" footerText="Rol"  filterBy="#{usuario.role.descripcion}" sortBy="#{usuario.role.descripcion}"
+                          filterMatchMode="contains" width="100">
+                    <h:outputText value="#{usuario.role.descripcion}"/>
+                </p:column>
+
+                <p:column headerText="Estado" footerText="Estado" filterBy="#{usuario.estado}" sortBy="#{usuario.estado}" width="100">
+                    <f:facet name="filter">
+                        <p:selectOneMenu onchange="PF('dtUsuarios').filter()">
+                            <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItem itemLabel="Activo" itemValue="true"/>
+                            <f:selectItem itemLabel="Inactivo" itemValue="false"/>
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{usuario.estado ? 'Activo' : 'Inactivo'}"/>
+                </p:column>
+
+                <p:column headerText="Creado" footerText="Creado"  filterBy="#{usuario.createdAt}" sortBy="#{usuario.createdAt}" width="300">
+                    <f:facet name="filter">
+                        <p:datePicker selectionMode="range" showTime="true" timeOnly="false"
+                                      pattern="dd/MM/yyyy HH:mm:ss"
+                                      onchange="PF('dtUsuarios').filter()"
+                                      converter="instantConverter"/>
+                    </f:facet>
+                    <h:outputText value="#{usuario.createdAt}">
+                        <f:converter converterId="instantConverter"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Actualizado" footerText="Actualizado" filterBy="#{usuario.updatedAt}" sortBy="#{usuario.updatedAt}" width="300">
+                    <f:facet name="filter">
+                        <p:datePicker selectionMode="range" showTime="true" timeOnly="false"
+                                      pattern="dd/MM/yyyy HH:mm:ss"
+                                      onchange="PF('dtUsuarios').filter()"
+                                      converter="instantConverter"/>
+                    </f:facet>
+                    <h:outputText value="#{usuario.updatedAt}">
+                        <f:converter converterId="instantConverter"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Acciones" footerText="Acciones" style="text-align:center" width="100">
+                    <p:commandButton icon="pi pi-pencil" title="Editar"
+                                     actionListener="#{usuarioMB.editarUsuario(usuario)}"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-usuario-content, :formCrud:dtUsuarios"
+                                     oncomplete="PF('manageUsuarioDialog').show()"
+                                     styleClass="edit-button rounded-button ui-button-success boton-espaciado">
+                        <f:setPropertyActionListener target="#{usuarioMB.selectedUsuario}" value="#{usuario}"/>
+                        <p:resetInput target=":dialogs:manage-usuario-content"/>
+                    </p:commandButton>
+                    <p:commandButton icon="pi pi-trash" title="Eliminar"
+                                     actionListener="#{usuarioMB.eliminarUsuario()}"
+                                     process="@this"
+                                     update="globalMessages:globalGrowl, :dialogs:manage-usuario-content, :formCrud:dtUsuarios"
+                                     oncomplete="PF('deleteUsuarioDialog').show()"
+                                     styleClass="ui-button-warning rounded-button boton-espaciado">
+                        <f:setPropertyActionListener target="#{usuarioMB.selectedUsuario}" value="#{usuario}"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+        </h:form>
+    </ui:define>
+
+    <ui:define name="dialogs">
+        <!-- Diálogos se definen aquí para mantener los inputs fuera del efecto fade -->
+        <h:form id="dialogs">
+            <!-- Diálogo para crear/editar usuario -->
+            <p:dialog widgetVar="manageUsuarioDialog"
+                      header="Detalles de Usuario"
+                      modal="true"
+                      responsive="true"
+                      showEffect="fade">
+                <p:outputPanel id="manage-usuario-content" class="ui-fluid">
+                    <p:panelGrid columns="2" columnClasses="label,value" style="margin-bottom:10px">
+                        <p:outputLabel for="nombre" value="Nombre:"/>
+                        <p:inputText id="nombre" value="#{usuarioMB.nombre}" required="true" maxlength="30">
+                            <f:validateRegex pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"/>
+                            <f:validateLength maximum="30"/>
+                        </p:inputText>
+
+                        <p:outputLabel for="apellido" value="Apellido:"/>
+                        <p:inputText id="apellido" value="#{usuarioMB.apellido}" required="true" maxlength="30">
+                            <f:validateRegex pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"/>
+                            <f:validateLength maximum="30"/>
+                        </p:inputText>
+
+                        <p:outputLabel for="documentoIdentificacion" value="Doc ID:"/>
+                        <p:inputText id="documentoIdentificacion" value="#{usuarioMB.documentoIdentificacion}"
+                                     required="true">
+                            <f:validateLength maximum="30"/>
+                        </p:inputText>
+
+                        <p:outputLabel for="documentoEstudiante" value="Num.Estudiante:"/>
+                        <p:inputText id="documentoEstudiante" value="#{usuarioMB.documentoEstudiante}"
+                                     required="false">
+                            <f:validateLength maximum="30"/>
+                        </p:inputText>
+
+                        <p:outputLabel for="correo" value="Correo:"/>
+                        <p:inputText id="correo" value="#{usuarioMB.correoElectronico}" required="true" maxlength="30">
+                            <f:validateLength maximum="30"/>
+                        </p:inputText>
+
+                        <p:outputLabel for="contrasena" value="Contraseña:"/>
+                        <p:panelGrid columns="1">
+                            <p:inputText id="contrasena" value="#{usuarioMB.contrasena}"/>
+                            <p:commandButton value="Generar" actionListener="#{usuarioMB.generarContrasena}"
+                                             update="contrasena" process="manage-usuario-content @this"
+                                             style="margin-top:5px"/>
+                        </p:panelGrid>
+
+                        <h:outputLabel for="estado" value="Estado:"/>
+                        <h:selectBooleanCheckbox id="estado" value="#{usuarioMB.estado}"/>
+
+                        <p:outputLabel for="role" value="Rol:"/>
+                        <p:selectOneMenu id="role" value="#{usuarioMB.role}" required="true">
+                            <f:selectItems value="#{usuarioMB.roles}"/>
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Guardar" icon="pi pi-check"
+                                     actionListener="#{usuarioMB.registrar}"
+                                     update="globalMessages:globalGrowl, manage-usuario-content, :formCrud:dtUsuarios"
+                                     process="manage-usuario-content @this"
+                                     oncomplete="if (!args.validationFailed) { PF('manageUsuarioDialog').hide(); }"/>
+                    <p:commandButton value="Cancelar" icon="pi pi-times"
+                                     onclick="PF('manageUsuarioDialog').hide()"
+                                     type="button" styleClass="ui-button-secondary"/>
+                </f:facet>
+            </p:dialog>
+
+            <!-- Diálogo de confirmación para eliminación individual -->
+            <p:confirmDialog widgetVar="deleteUsuarioDialog"
+                             header="Confirmación"
+                             message="¿Está seguro de eliminar este usuario?"
+                             modal="true"
+                             showEffect="fade"
+                             width="300">
+                <p:commandButton value="Sí" icon="pi pi-check"
+                                 actionListener="#{usuarioMB.eliminarUsuario}"
+                                 process="@this"
+                                 update="globalMessages:globalGrowl, :formCrud:btnEliminar"
+                                 oncomplete="PF('deleteUsuarioDialog').hide()"/>
+                <p:commandButton value="No" icon="pi pi-times"
+                                 onclick="PF('deleteUsuarioDialog').hide()"
+                                 type="button" styleClass="ui-button-secondary"/>
+            </p:confirmDialog>
+
+            <!-- Confirm Dialog global (opcional para múltiples eliminaciones) -->
+            <p:confirmDialog global="true" showEffect="fade" width="300">
+                <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                                 icon="pi pi-times"/>
+            </p:confirmDialog>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

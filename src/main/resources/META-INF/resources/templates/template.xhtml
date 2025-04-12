@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:sec="https://joinfaces.org/security"
+      xmlns:p="primefaces"
+      xmlns:pe="primefaces.extensions"
+>
+<h:head>
+    <title><ui:insert name="titulo"/></title>
+    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <h:outputStylesheet library="assets" name="css/primeflex.css"/>
+    <h:outputStylesheet library="assets" name="css/primeicons.css"/>
+    <h:outputStylesheet library="assets" name="css/stylle.css"/>
+    <h:outputStylesheet library="assets" name="css/chat.css" />
+    <h:outputStylesheet library="assets" name="css/personalizados.css" />
+
+</h:head>
+<h:body>
+    <h:form id="globalMessages">
+        <p:growl id="globalGrowl" autoUpdate="true" showDetail="true"/>
+    </h:form>
+    <pe:layout fullPage="true">
+        <pe:layoutPane id="layoutPane" position="center">
+            <h:form id="form">
+                <div class="ui-fluid center">
+
+                    <p:menubar>
+                        <p:menuitem value="Inicio" outcome="/home.xhtml"/>
+                        <sec:authorize access="hasRole('ROLE_ADMIN')">
+                            <p:menuitem value="FAQ Config" outcome="/admin/faqs.xhtml"/>
+                            <p:menuitem value="Usuarios Config" outcome="/admin/usuarios.xhtml"/>
+                        </sec:authorize>
+
+                        <sec:authorize access="hasRole('ROLE_USER')">
+                            <p:menuitem value="CHAT" outcome="/usuario/chat.xhtml"
+                                        rendered="#{sec:isAuthenticated()}"/>
+                        </sec:authorize>
+                        <p:menuitem value="Cerrar Sesión" url="/logout"/>
+                    </p:menubar>
+                </div>
+            </h:form>
+            <div class="px-4 py-5 md:px-6 lg:px-8">
+                <div class="flex align-items-center justify-content-center">
+                    <section class="surface-section px-4 py-5 md:px-6 lg:px-8 w-full">
+                        <div class="flex flex-column lg:flex-row gap-3 justify-content-between lg:align-items-center border-primary py-5"
+                             style="border-top: 7px solid">
+                            <div class="flex flex-column gap-2">
+                                <div class="flex align-items-center gap-2">
+                                    <h1 class="m-0 font-semibold text-900 text-xl line-height-3">
+                                        Bienvenido <ui:insert name="nombreUsuario"/>
+                                    </h1>
+                                </div>
+                                <p class="mb-0 mt-0 text-base text-600">
+                                    Estas dentro del <ui:insert name="nombrePagina"/>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Inserta el contenido específico aquí -->
+                        <ui:insert name="contenido"/>
+
+
+                    </section>
+                </div>
+            </div>
+            <!-- Pie de Página -->
+            <footer style="background-color: #CAD225; padding: 30px 20px; text-align: center; margin-top: 30px;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <!-- Logo UTS -->
+                    <div style="margin-bottom: 15px;">
+                        <h:graphicImage library="assets" name="images/uts_logo.png" alt="Logo UTS" style="max-height: 70px;" />
+                    </div>
+                    <!-- Título del Proyecto -->
+                    <h2 style="margin: 0; font-family: Arial, sans-serif;">TecnoBot - Proyecto de grado tecnología</h2>
+                    <!-- Datos -->
+                    <p style="margin: 5px 0; font-size: 14px; line-height: 1.5; font-family: Arial, sans-serif;">
+                        Diego Alejandro Tavera Pérez cc.1005257603<br/>
+                        Mayra Alejandra Sierra Mejía cc.1096700211<br/>
+                        UNIDADES TECNOLÓGICAS DE SANTANDER<br/>
+                        FCNI<br/>
+                        Tecnología en Desarrollo de Sistemas informáticos
+                    </p>
+                </div>
+            </footer>
+        </pe:layoutPane>
+    </pe:layout>
+    <!-- En template.xhtml, justo antes de cerrar </h:body> -->
+    <ui:insert name="dialogs"/>
+
+
+
+</h:body>
+</html>

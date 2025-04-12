@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.uts'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JoinFaces Platform centralizada
+    implementation platform('org.joinfaces:joinfaces-platform:5.3.5')
+    runtimeOnly platform('org.joinfaces:joinfaces-platform:5.3.5')
+    // Dependencias específicas para JSF y JoinFaces
+    implementation 'org.joinfaces:faces-spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation group: 'org.joinfaces', name: 'primefaces-spring-boot-starter', version: '5.3.5'
+    implementation group: 'org.joinfaces', name: 'security-spring-boot-starter', version: '5.3.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation group: 'org.webjars.npm', name: 'primeflex', version: '3.3.1'
+    runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation group: 'org.primefaces', name: 'primefaces', version: '14.0.8', classifier: 'jakarta'
+    implementation group: 'org.primefaces.extensions', name: 'primefaces-extensions', version: '14.0.8', classifier: 'jakarta'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.12.1'
+
+    // Procesamiento de lenguaje natural con Apache OpenNLP
+    implementation("org.apache.opennlp:opennlp-tools:2.5.3")
+
+    // Algoritmos de fuzzy matching con Apache Commons Text
+    implementation("org.apache.commons:commons-text:1.13.0")
+
+
+    //jsoup  para el html de los correos
+    implementation("org.jsoup:jsoup:1.19.1")
+
+
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

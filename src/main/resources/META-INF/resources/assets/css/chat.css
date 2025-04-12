@@ -1,0 +1,52 @@
+/* Contenedor principal del chat */
+.chat-container {
+    /* Ancho fijo o máximo, ajusta a tu gusto */
+    width: 600px;
+    margin: auto;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /* NO definas height si quieres que crezca en altura según contenido,
+       pero si lo quieres más responsivo, usa max-width: 600px; width: 100%; */
+}
+
+/* Sección donde se listan los mensajes, con un alto máximo y scroll interno */
+.chat-messages {
+    max-height: 300px;   /* Ajusta según lo que necesites */
+    overflow-y: auto;    /* Para que aparezca scroll cuando exceda 300px */
+    padding: 10px;
+    background-color: #f8f8f8; /* Color de fondo */
+}
+
+/* Sección para el input y el botón, siempre al final */
+.chat-input {
+    display: flex;       /* Para que input y botón estén en la misma fila */
+    gap: 10px;           /* Espacio entre input y botón */
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ccc; /* Separador visual arriba */
+}
+
+/* Mensajes alineados a la izquierda */
+.left-message {
+    float: left;
+    clear: both;
+    background-color: #f0f0f0;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 60%;
+    text-align: left;
+}
+
+/* Mensajes alineados a la derecha */
+.right-message {
+    float: right;
+    clear: both;
+    background-color: #c2f0c2;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 60%;
+    text-align: right;
+}

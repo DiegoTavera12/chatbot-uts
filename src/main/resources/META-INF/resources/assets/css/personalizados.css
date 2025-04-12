@@ -1,0 +1,16 @@
+.boton-espaciado {
+    margin-right: 10px;
+}
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Color para el estado activo */
+.custom-switch .ui-inputswitch-slider {
+    background-color: #28a745 !important; /* Verde */
+}
+/* Color para el estado inactivo */
+.custom-switch:not(.ui-inputswitch-checked) .ui-inputswitch-slider {
+    background-color: #dc3545 !important; /* Rojo */
+}

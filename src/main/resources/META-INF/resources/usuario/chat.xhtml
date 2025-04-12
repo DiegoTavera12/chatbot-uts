@@ -1,0 +1,67 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="jakarta.faces.html"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:p="http://primefaces.org/ui"
+        template="../templates/template.xhtml">
+
+    <!-- Inyectamos el título, usuarioDomain, nombre de página si es necesario -->
+    <ui:define name="titulo">
+        Home Usuario
+    </ui:define>
+
+    <ui:define name="nombreUsuario">
+        #{loginMB.userName}
+    </ui:define>
+
+    <ui:define name="nombrePagina">
+        Chat
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:form id="chatForm">
+
+            <!-- Panel con la clase "chat-container" -->
+            <p:panel header="Chat" styleClass="chat-container">
+
+                <!-- Sección que muestra los mensajes -->
+                <p:outputPanel id="chatMessages" styleClass="chat-messages" autoUpdate="true">
+                    <ui:repeat value="#{chatBean.listaMensajesChat}" var="msg">
+                        <!-- Mensajes con alignment 'left' o 'right' -->
+                        <h:panelGroup styleClass="#{msg.alineacion eq 'left' ? 'left-message' : 'right-message'}">
+                            <h:outputText value="#{msg.texto}" escape="false" style="white-space: pre-wrap;" />
+                        </h:panelGroup>
+                    </ui:repeat>
+                </p:outputPanel>
+
+                <!-- Sección fija para el input y botón de envío -->
+                <div class="chat-input">
+                    <p:inputText id="inputMessage" value="#{chatBean.mensajeEntrada}" style="width:80%;" />
+                    <p:commandButton value="Enviar" action="#{chatBean.enviarMensaje}" update="chatForm panelArchivos" />
+                </div>
+
+                <div class="chat-input">
+                    <p:inputText id="inputCorreo" value="#{chatBean.correoDestinatario}" style="width:80%;" />
+                    <p:commandButton value="Enviar Correo" action="#{chatBean.enviarCorreo}" update="chatForm panelArchivos" />
+                </div>
+
+            </p:panel>
+
+
+            <p:panel header="Archivos Adjuntos" id="panelArchivos">
+                <p:dataTable value="#{chatBean.fileList}" var="file" emptyMessage="No hay archivos adjuntos">
+                    <p:column headerText="Archivo">
+                        <h:outputText value="#{file}" />
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <p:commandButton value="Descargar" ajax="false">
+                            <p:fileDownload value="#{chatBean.downloadFile(file)}" />
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>
