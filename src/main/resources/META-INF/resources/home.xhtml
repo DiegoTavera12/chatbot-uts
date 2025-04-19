@@ -2,8 +2,8 @@
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:h="jakarta.faces.html"
         xmlns:ui="jakarta.faces.facelets"
-        template="templates/template.xhtml"
->
+        xmlns:sec="https://joinfaces.org/security"
+        template="templates/template.xhtml">
 
     <ui:define name="titulo">
         Home
@@ -15,6 +15,24 @@
 
     <ui:define name="nombrePagina">
         Home
+    </ui:define>
+
+    <ui:define name="contenido">
+
+        Espacio reservado para anuncios de la universidad
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+
+        <!-- Solo usuarios con ROLE_USER ven este aviso -->
+        <sec:authorize access="hasRole('ROLE_USER')">
+            <div class="p-mb-4 p-text-center p-text-info">
+                Haga click en el menú <strong>CHAT</strong> para iniciar las consultas...
+            </div>
+        </sec:authorize>
+
+
     </ui:define>
 
 </ui:composition>
