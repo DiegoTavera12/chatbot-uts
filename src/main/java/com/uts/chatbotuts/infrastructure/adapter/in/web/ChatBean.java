@@ -132,9 +132,7 @@ public class ChatBean implements Serializable {
 
             faqsDto = null;
 
-            // Utiliza el servicio de NLP para tokenizar la entrada
-            // (Aquí podrías inyectar o acceder a NlpService desde el use case o ChatBean)
-            String[] tokens = mensajeEntrada.split("\\s+");  // Reemplaza esto por nlpService.tokenize(mensajeEntrada) si lo integras directamente
+            String[] tokens = mensajeEntrada.split("\\s+");
             List<Long> idsPalabrasClaves = chatConsultaUseCase.obtenerIdsPalabrasClaves(tokens);
             List<Long> faqIds = chatConsultaUseCase.obtenerIdsFaqByPalabrasClaveIds(idsPalabrasClaves);
 
