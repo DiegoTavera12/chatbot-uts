@@ -67,7 +67,7 @@ public class ChatBean implements Serializable {
 
         listaMensajesChat = new ArrayList<>();
         // Mensaje inicial del sistema
-        listaMensajesChat.add(new MensajeChat("Hola bienvenido, dame tu duda", "left"));
+        listaMensajesChat.add(new MensajeChat("Hola bienvenid@, dame tu duda", "left"));
     }
 
     List<FaqDomain> faqsDto = null;
