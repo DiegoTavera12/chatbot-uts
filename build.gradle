@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.uts'
-version = '0.0.1-27042025'
+version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
